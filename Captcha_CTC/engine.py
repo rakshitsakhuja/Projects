@@ -35,4 +35,4 @@ def eval_fn(model, data_loader):
             fin_loss += loss.item()
             fin_prediction.append(batch_prediction)  # Need to be changed for CPU
 
-    return fin_prediction, fin_loss / len(data_loader)
+        return fin_prediction, fin_loss / len(data_loader)

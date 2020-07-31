@@ -6,13 +6,29 @@ from pprint import pprint
 
 import numpy as np
 import torch
-from sklearn import preprocessing, model_selection
+from sklearn import preprocessing, model_selection,metrics
 from torch.utils import data
 
 import config
 import engine
 from dataset import CaptchaImageDataset
 from model import CaptchaModel
+
+
+
+def remove_duplicates(x):
+    if len(x) < 2:
+        return x
+    fin = ""
+    for j in x:
+        if fin == "":
+            fin = j
+        else:
+            if j == fin[-1]:
+                continue
+            else:
+                fin = fin + j
+    return fin
 
 
 def decode_predictions(prediction, encoder):
@@ -29,13 +45,14 @@ def decode_predictions(prediction, encoder):
                 temp.append("~")
             else:
                 temp.append(encoder.inverse_transform([k])[0])
-        tp = "".join(temp)
-        cap_prediction.append(tp)
+
+        tp = "".join(temp).replace("~", "")
+        cap_prediction.append(remove_duplicates(tp))
     return cap_prediction
 
 
 def run_training():
-    image_files = glob.glob(os.path.join(config.DATA_DIR, "*.png"))
+    image_files = glob.glob(os.path.join(config.DATA_DIR, "*.png"))[:10]
     targets_orig = [os.path.splitext(os.path.basename(i))[0] for i in image_files]
 
     targets = [[c for c in i] for i in targets_orig]
@@ -48,6 +65,7 @@ def run_training():
 
     train_images, test_images, train_targets, test_targets, train_orig_targets, test_orig_targets = model_selection.train_test_split(
         image_files, target_enc, targets_orig, test_size=0.1, random_state=42)
+    print(train_images[0], test_images[0], train_targets[0], test_targets[0], train_orig_targets[0], test_orig_targets[0])
 
     train_data = CaptchaImageDataset(
         image_paths=train_images,
@@ -64,7 +82,7 @@ def run_training():
 
     test_data = CaptchaImageDataset(
         image_paths=test_images,
-        targets=train_targets,
+        targets=test_targets,
         resize=(config.IMAGE_HEIGHT, config.IMAGE_WIDTH)
     )
     test_loader = data.DataLoader(
@@ -89,13 +107,20 @@ def run_training():
     for epoch in range(config.EPOCHS):
         train_loss = engine.train_fn(model, train_loader, optimizer)
         test_prediction, test_loss = engine.eval_fn(model, test_loader)
+        print(test_prediction,test_loss)
         #     print(type(test_prediction[0]))
         test_cap_prediction = []
         for kk in test_prediction:
             current_prediction = decode_predictions(kk, lbl_enc)
+            print(current_prediction[0])
             test_cap_prediction.extend(current_prediction)
-        pprint(list(zip(test_orig_targets, test_cap_prediction))[6:11])
-        print(f"Epoch: {epoch},train_loss:{train_loss},test_loss:{test_loss}")
+        print(test_cap_prediction)
+        combined = list(zip(test_orig_targets, test_cap_prediction))
+        print(combined[:10])
+        test_dup_rem = [remove_duplicates(c) for c in test_orig_targets]
+        print(test_dup_rem)
+        accuracy = metrics.accuracy_score(test_dup_rem, test_cap_prediction)
+        print(f"Epoch: {epoch},train_loss:{train_loss},test_loss:{test_loss},Accuracy={accuracy}")
         scheduler.step(test_loss)
 
 
