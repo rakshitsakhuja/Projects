@@ -52,7 +52,7 @@ def decode_predictions(prediction, encoder):
 
 
 def run_training():
-    image_files = glob.glob(os.path.join(config.DATA_DIR, "*.png"))[:10]
+    image_files = glob.glob(os.path.join(config.DATA_DIR, "*.png"))
     targets_orig = [os.path.splitext(os.path.basename(i))[0] for i in image_files]
 
     targets = [[c for c in i] for i in targets_orig]
@@ -65,7 +65,7 @@ def run_training():
 
     train_images, test_images, train_targets, test_targets, train_orig_targets, test_orig_targets = model_selection.train_test_split(
         image_files, target_enc, targets_orig, test_size=0.1, random_state=42)
-    print(train_images[0], test_images[0], train_targets[0], test_targets[0], train_orig_targets[0], test_orig_targets[0])
+    # print(train_images[0], test_images[0], train_targets[0], test_targets[0], train_orig_targets[0], test_orig_targets[0])
 
     train_data = CaptchaImageDataset(
         image_paths=train_images,
@@ -112,13 +112,13 @@ def run_training():
         test_cap_prediction = []
         for kk in test_prediction:
             current_prediction = decode_predictions(kk, lbl_enc)
-            print(current_prediction[0])
+            # print(current_prediction[0])
             test_cap_prediction.extend(current_prediction)
-        print(test_cap_prediction)
+        # print(test_cap_prediction)
         combined = list(zip(test_orig_targets, test_cap_prediction))
-        print(combined[:10])
+        # print(combined[:10])
         test_dup_rem = [remove_duplicates(c) for c in test_orig_targets]
-        print(test_dup_rem)
+        # print(test_dup_rem)
         accuracy = metrics.accuracy_score(test_dup_rem, test_cap_prediction)
         print(f"Epoch: {epoch},train_loss:{train_loss},test_loss:{test_loss},Accuracy={accuracy}")
         scheduler.step(test_loss)
@@ -127,3 +127,4 @@ def run_training():
 if __name__ == "__main__":
 
     run_training()
+
