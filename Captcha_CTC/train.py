@@ -6,14 +6,19 @@ from pprint import pprint
 
 import numpy as np
 import torch
-from sklearn import preprocessing, model_selection,metrics
+from sklearn import preprocessing, model_selection, metrics
 from torch.utils import data
 
 import config
 import engine
+from checkpoint import save_ckp
 from dataset import CaptchaImageDataset
 from model import CaptchaModel
 
+
+import matplotlib.pyplot as plt
+plt.style.use('seaborn-whitegrid')
+import numpy as np
 
 
 def remove_duplicates(x):
@@ -104,10 +109,18 @@ def run_training():
         verbose=True
     )
     print('done')
+
+    losses = []
+    accuracy_scores = []
+    best_loss = 1e10
+    best_accuracy=0
     for epoch in range(config.EPOCHS):
         train_loss = engine.train_fn(model, train_loader, optimizer)
         test_prediction, test_loss = engine.eval_fn(model, test_loader)
-        print(test_prediction,test_loss)
+
+
+        # print(test_prediction,test_loss)
+
         #     print(type(test_prediction[0]))
         test_cap_prediction = []
         for kk in test_prediction:
@@ -120,11 +133,39 @@ def run_training():
         test_dup_rem = [remove_duplicates(c) for c in test_orig_targets]
         # print(test_dup_rem)
         accuracy = metrics.accuracy_score(test_dup_rem, test_cap_prediction)
-        print(f"Epoch: {epoch},train_loss:{train_loss},test_loss:{test_loss},Accuracy={accuracy}")
+        accuracy_scores.append(accuracy)
+        losses.append(test_loss)
+        if best_loss > test_loss:
+            best_loss = test_loss
+            best_accuracy = accuracy
+            checkpoint = {
+                'epoch': epoch + 1,
+                'best_loss': test_loss,
+                'state_dict': model.state_dict(),
+                'optimizer': optimizer.state_dict()}
+            save_ckp(checkpoint, True, config.checkpoint_path, config.best_model_path)
+            print('Saving Best Model')
+        print(f"Epoch: {epoch},   train_loss:{train_loss},  test_loss:{test_loss},   Accuracy={accuracy}")
         scheduler.step(test_loss)
+
+    print(f"Accuracy of Model is {best_accuracy}  and Test Loss is {best_loss,}")
+    fig = plt.figure()
+    ax = plt.axes()
+
+
+    ax.plot(accuracy_scores,label='Accuracy Scores');
+    plt.show()
+
+    fig = plt.figure()
+    ax = plt.axes()
+    ax.plot(losses,label='Loss Values');
+    plt.show()
+
+
+
+
+
 
 
 if __name__ == "__main__":
-
     run_training()
-

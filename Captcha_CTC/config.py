@@ -5,3 +5,5 @@ IMAGE_HEIGHT = 75
 NUM_WORKERS = 4
 EPOCHS = 200
 DEVICE = "cpu"  # cuda
+checkpoint_path= 'checkpoints/current_checkpoint.pt'
+best_model_path= 'checkpoints/best_model.pt'
