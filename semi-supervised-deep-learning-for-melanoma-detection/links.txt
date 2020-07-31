@@ -1,0 +1,10 @@
+https://towardsdatascience.com/semi-supervised-learning-with-gans-9f3cb128c5e
+https://blog.scaleway.com/2020/semi-supervised/
+https://pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html
+https://pytorch.org/tutorials/beginner/data_loading_tutorial.html
+https://nanonets.com/blog/data-augmentation-how-to-use-deep-learning-when-you-have-limited-data-part-2/
+https://livebook.manning.com/book/deep-learning-with-pytorch/welcome/v-13/
+https://livebook.manning.com/book/gans-in-action/gans-in-action-deep-learning-with-generative-adversarial-networks/
+https://www.marktechpost.com/2019/06/09/getting-started-with-pytorch-in-google-collab-with-free-gpu/
+https://medium.com/dair-ai/pytorch-1-2-quickstart-with-google-colab-6690a30c38d
+https://www.digitalocean.com/community/tutorials/how-to-install-run-connect-to-jupyter-notebook-on-remote-server
